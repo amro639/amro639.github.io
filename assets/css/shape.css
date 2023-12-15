@@ -1,0 +1,33 @@
+transform: translateY(-90px);
+opacity: 0;
+pointer-events: none;
+transition: all .5s;
+}
+.profile-card:hover .caption{
+opacity: 1;
+pointer-events: all;
+}
+.caption h3{
+font-size: 21px;
+color: #0c52a1;
+font-weight: 600;
+}
+.caption p{
+font-size: 15px;
+font-weight: 500;
+margin: 2px 0 12px 0;
+}
+.caption .social-links i{
+font-size: 21px;
+margin: 0 3px;
+cursor: pointer;
+color: #333;
+transition: all .4s;
+}
+.caption .social-links i:hover{
+color: #0c52a1;
+}
+
+</style>
+<b:if cond='data:view.isLayoutMode'>
+<b:template-skin>

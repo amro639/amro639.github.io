@@ -1,0 +1,49 @@
+.services {
+    background: #fff;
+    padding-top: 190px;
+}
+
+.services .titlepage {
+    padding-bottom: 120px;
+    text-align: center;
+}
+
+.services_box {
+
+
+    max-width: 400px;
+    margin-left: 200px;
+}
+
+.services_box figure {
+    margin: 0;
+}
+
+.services_box figure img {
+    transition: ease-in all 0.5s;
+}
+
+.services_box h3 {
+    color: #363636;
+    font-size: 24px;
+    line-height: normal;
+    font-weight: bold;
+    padding-bottom: 25px;
+}
+
+.services_box p {
+    line-height: 30px;
+    padding-top: 23px;
+    padding-bottom: 30px;
+}
+
+#ho_shad:hover.services_box figure img {
+    transition: ease-in all 0.5s;
+    box-shadow: 0 0 38px rgba(13, 3, 3, 0.10);
+}
+
+#ho_shad:hover .read_more {
+    background: #fdc001;
+    transition: ease-in all 0.5s;
+    color: #fff;
+}

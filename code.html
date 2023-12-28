@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <title>Aura (team 16305 R3S)</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <!-- Additional CSS Files -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/css/templatemo-chain-app-dev.css">
+    <link rel="stylesheet" href="assets/css/animated.css">
+    <link rel="stylesheet" href="assets/css/owl.css">
+    <link rel="stylesheet" href="D:\Downloads\web-main\web-main\templatemo_570_chain_app_dev\coode.css">
+
+
+</head>
+<body>
+
+
+    
+      <!-- ***** Header Area Start ***** -->
+      <header class="header-area header-sticky wow slideInDown" data-wow-duration="0.75s" data-wow-delay="0s">
+        <div class="container">
+          <div class="row">
+            <div class="col-12">
+              <nav class="main-nav">
+                <!-- ***** Logo Start ***** -->
+                <a href="index.html" class="logo">
+                  <img src="assets/images/logo.png" alt="Chain App Dev" width="100px" height="100px">
+                </a>
+                <!-- ***** Logo End ***** -->
+                <!-- ***** Menu Start ***** -->
+                <ul class="nav">
+                  <li class="scroll-to-section"><a href="D:\Downloads\web-main\web-main\templatemo_570_chain_app_dev\index.html" class="active">Home</a></li>
+                  <li class="scroll-to-section"><a href="https://www.cdc.gov/epilepsy/managing-epilepsy/index.htm">Tips and tricks</a></li>
+                  <li class="scroll-to-section"><a href="https://epilepsysociety.org.uk/">About epilepsy </a></li>
+                  <li class="scroll-to-section"><a href="https://drive.google.com/file/d/1hXIP0M7ZIZEu76tcWpENjPRuEnVuF4JL/view?usp=sharing">App</a></li>
+                  <li class="scroll-to-section"><a href="D:\Downloads\web-main\web-main\templatemo_570_chain_app_dev\code.html">system code</a></li>
+                  
+                </ul>        
+                <a class='menu-trigger'>
+                    <span>Menu</span>
+                </a>
+                <!-- ***** Menu End ***** -->
+              </nav>
+            </div>
+          </div>
+        </div>
+      </header>  
+ 
+<br><br><br><br><br><br>
+      <h1> Our arduino system code </h1>
+    <code>
+        #include <Arduino.h>
+            #include <WiFi.h>
+            #include <Firebase_ESP_Client.h>
+            #include <addons/TokenHelper.h>
+            #define WIFI_SSID "Guess Who?"
+            #define WIFI_PASSWORD "AmroS24R3S"
+            
+            /* 2. Define the API Key */
+            #define API_KEY "AIzaSyDg9kTTVD567OtJ-MbWnQdXFl58BzGJ5gU"
+            
+            /* 3. Define the project ID */
+            #define FIREBASE_PROJECT_ID "hrvsensor-2dfff"
+            
+            /* 4. Define the user Email and password that alreadey registerd or added in your project */
+            #define USER_EMAIL "esp32@blink.com"
+            #define USER_PASSWORD "esp32esp32"
+            
+            // Define Firebase Data object
+            FirebaseData fbdo;
+            
+            FirebaseAuth auth;
+            FirebaseConfig config;
+            
+            unsigned long dataMillis = 0;
+            int count = 0;
+            
+            
+            int UpperThreshold = 518;
+            int LowerThreshold = 490;
+            int reading = 0;
+            float BPM = 0.0;
+            int Signal;
+            
+            bool IgnoreReading = false;
+            bool FirstPulseDetected = false;
+            
+            unsigned long FirstPulseTime = 0;
+            unsigned long SecondPulseTime = 0;
+            unsigned long PulseInterval = 0;
+            
+            const unsigned long delayTime = 10;
+            const unsigned long delayTime2 = 1000;
+            
+            unsigned long previousMillis = 0;
+            unsigned long previousMillis2 = 0;
+            
+            void setup() {
+              Serial.begin(115200);
+              pinMode(23, INPUT);
+              pinMode(22, INPUT);
+            
+              WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+              Serial.print("Connecting to Wi-Fi");
+              unsigned long ms = millis();
+              while (WiFi.status() != WL_CONNECTED) {
+                Serial.print(".");
+                delay(300);
+                f
+              }
+              Serial.println();
+              Serial.print("Connected with IP: ");
+              Serial.println(WiFi.localIP());
+              Serial.println();
+            
+              Serial.printf("Firebase Client v%s\n\n", FIREBASE_CLIENT_VERSION);
+            
+              /* Assign the api key (required) */
+              config.api_key = API_KEY;
+            
+              /* Assign the user sign in credentials */
+              auth.user.email = USER_EMAIL;
+              auth.user.password = USER_PASSWORD;
+            
+              /* Assign the callback function for the long running token generation task */
+              config.token_status_callback = tokenStatusCallback;  // see addons/TokenHelper.h
+            
+              // Comment or pass false value when WiFi reconnection will control by your code or third party library e.g. WiFiManager
+              Firebase.reconnectNetwork(true);
+            
+              // Since v4.4.x, BearSSL engine was used, the SSL buffer need to be set.
+              // Large data transmission may require larger RX buffer, otherwise connection issue or data read time out can be occurred.
+              fbdo.setBSSLBufferSize(4096 /* Rx buffer size in bytes from 512 - 16384 */, 1024 /* Tx buffer size in bytes from 512 - 16384 */);
+            
+              // Limit the size of response payload to be collected in FirebaseData
+              fbdo.setResponseSize(2048);
+            
+              Firebase.begin(&config, &auth);
+            }
+            
+            void loop() {
+            
+              unsigned long currentMillis = millis();
+              if (myTimer1(delayTime, currentMillis) == 1) {
+            
+                reading = analogRead(0);
+            
+                if (reading > UpperThreshold && IgnoreReading == false) {
+                  if (FirstPulseDetected == false) {
+                    FirstPulseTime = millis();
+                    FirstPulseDetected = true;
+                  } else {
+                    SecondPulseTime = millis();
+                    PulseInterval = SecondPulseTime - FirstPulseTime;
+                    FirstPulseTime = SecondPulseTime;
+                  }
+                  IgnoreReading = true;
+                }
+                if (reading < LowerThreshold && IgnoreReading == true) {
+                  IgnoreReading = false;
+                }
+                BPM = (1.0 / PulseInterval) * 60.0 * 1000;
+              }
+            
+              if (myTimer2(delayTime2, currentMillis) == 1) {
+                Serial.print(reading);
+                Serial.print("\t");
+                Serial.print(PulseInterval);
+                Serial.print("\t");
+                Serial.print(BPM);
+                Serial.println(" BPM");
+                Serial.flush();
+              }
+            }
+            
+            void firestore() {
+            
+              if (Firebase.ready() && (millis() - dataMillis > 60000 || dataMillis == 0)) {
+                dataMillis = millis();
+            
+                // For the usage of FirebaseJson, see examples/FirebaseJson/BasicUsage/Create_Edit_Parse/Create_Edit_Parse.ino
+                FirebaseJson content;
+            
+                // aa is the collection id, bb is the document id.
+                String documentPath = "HRVdata/EngineeringCapstone";
+            
+            
+              content.clear();
+              content.set("fields/HRV/integerValue", BPM);
+            
+              Serial.print("Update a document... ");
+            
+              if (Firebase.Firestore.patchDocument(&fbdo, FIREBASE_PROJECT_ID, "" /* databaseId can be (default) or empty */, documentPath.c_str(), content.raw(), "HRV" /* updateMask */))
+                Serial.printf("ok\n%s\n\n", fbdo.payload().c_str());
+              else
+                Serial.println(fbdo.errorReason());
+            }
+            
+            
+            int myTimer1(long delayTime, long currentMillis) {
+              if (currentMillis - previousMillis >= delayTime) {
+                previousMillis = currentMillis;
+                return 1;
+              } else {
+                return 0;
+              }
+            }
+            
+            // Second event timer
+            int myTimer2(long delayTime2, long currentMillis) {
+              if (currentMillis - previousMillis2 >= delayTime2) {
+                previousMillis2 = currentMillis;
+                return 1;
+              } else {
+                return 0;
+              }
+            }
+    </code>
+</body>
+</html>
